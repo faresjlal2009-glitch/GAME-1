@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>شخصيتك في ميم</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#0f1226; --panel:#1b1f3d; --text:#f5f3ff; --muted:#a9acd6; --a:#ffd23f; --b:#ff5d8f; }
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  body {
+    font-family:"Cairo", system-ui, sans-serif;
+    background:radial-gradient(circle at 80% 0%, #2a2160 0%, var(--bg) 55%);
+    color:var(--text);
+    min-height:100dvh;
+    display:flex; justify-content:center;
+    padding:calc(20px + env(safe-area-inset-top)) 18px calc(20px + env(safe-area-inset-bottom));
+  }
+  .wrap { width:min(100%,460px); display:flex; flex-direction:column; justify-content:center; gap:16px; text-align:center; }
+  h1 { font-size:2rem; line-height:1.3; }
+  h1 span { background:linear-gradient(90deg,var(--a),var(--b)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  p.sub { color:var(--muted); line-height:1.7; }
+  .big { font-size:5rem; }
+  input {
+    font:inherit; text-align:center; width:100%;
+    padding:12px 16px; border-radius:14px; border:2px solid #34396b;
+    background:var(--panel); color:var(--text);
+  }
+  input:focus { outline:none; border-color:var(--a); }
+  .btn {
+    font:inherit; font-weight:800; font-size:1.1rem; cursor:pointer;
+    border:none; border-radius:99px; padding:13px 28px; color:#1a1233;
+    background:linear-gradient(90deg,var(--a),var(--b));
+    box-shadow:0 5px 0 #a8365c; touch-action:manipulation;
+  }
+  .btn:active { transform:translateY(4px); box-shadow:0 1px 0 #a8365c; }
+  .btn.ghost { background:var(--panel); color:var(--text); box-shadow:0 5px 0 #0a0c1d; }
+  .row { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+
+  .dots { display:flex; gap:6px; justify-content:center; }
+  .dots i { width:34px; height:6px; border-radius:9px; background:#34396b; }
+  .dots i.on { background:linear-gradient(90deg,var(--a),var(--b)); }
+
+  .q { font-size:1.4rem; font-weight:800; line-height:1.5; min-height:4.2em; display:grid; place-items:center; }
+  .opts { display:grid; gap:10px; }
+  .opt {
+    font:inherit; font-weight:600; font-size:1.05rem; color:var(--text);
+    background:var(--panel); border:2px solid #34396b; border-radius:16px;
+    padding:14px; cursor:pointer; touch-action:manipulation;
+    transition:transform .1s, border-color .15s;
+  }
+  .opt:active { transform:scale(.97); border-color:var(--a); }
+
+  canvas { width:100%; border-radius:20px; box-shadow:0 14px 40px rgba(0,0,0,.5); }
+  .tg {
+    display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    align-self:center; margin-top:10px;
+    font-weight:800; font-size:1.05rem; text-decoration:none; color:#fff;
+    background:linear-gradient(90deg,#2aabee,#229ed9);
+    border-radius:99px; padding:12px 28px;
+    box-shadow:0 5px 0 #14729c; touch-action:manipulation;
+  }
+  .tg:active { transform:translateY(4px); box-shadow:0 1px 0 #14729c; }
+  .tg svg { width:22px; height:22px; }
+  [hidden] { display:none !important; }
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section id="intro">
+    <div class="big">🎭</div>
+    <h1>أنهي <span>شخصية ميم</span> إنت؟</h1>
+    <p class="sub">5 أسئلة سريعة وهنطلعلك شخصيتك مع كارت جاهز تبعته لأصحابك.</p>
+    <br>
+    <input id="name" type="text" maxlength="14" placeholder="اسمك (اختياري)" autocomplete="off">
+    <br><br>
+    <button class="btn" id="go" type="button">يلا نبدأ</button>
+  </section>
+
+  <section id="quiz" hidden>
+    <div class="dots" id="dots"></div>
+    <br>
+    <div class="q" id="q"></div>
+    <div class="opts" id="opts"></div>
+  </section>
+
+  <section id="result" hidden>
+    <canvas id="cv" width="1080" height="1350"></canvas>
+    <br>
+    <div class="row">
+      <button class="btn" id="share" type="button">مشاركة</button>
+      <button class="btn ghost" id="save" type="button">حفظ الصورة</button>
+      <button class="btn ghost" id="again" type="button">من الأول</button>
+    </div>
+  </section>
+
+  <a class="tg" href="https://t.me/fares121619" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 3.6 2.7 11c-1.3.5-1.3 1.3-.2 1.6l4.9 1.5 1.9 5.8c.2.6.4.8.9.8.4 0 .6-.2.9-.5l2.4-2.3 4.9 3.6c.9.5 1.5.2 1.8-.8L23 5c.3-1.3-.5-1.9-1.1-1.4zM9.2 13.6l9.6-6c.5-.3.9-.1.6.2l-8 7.2-.3 3.2z"/></svg>
+    <span>انضم لقناة التليجرام</span>
+  </a>
+
+</div>
+
+<script>
+  // ===== الشخصيات =====
+  const TYPES = {
+    lazy: { e:'🦥', name:'الكسلان المبدع',
+      desc:'أفكارك عظيمة لكن بتنفذها بعد ما الدنيا تهدى. بتوفر طاقتك للحاجات المهمة بس... وأي حاجة مش مهمة بتتأجل.',
+      power:'تنام في أي مكان في أقل من دقيقة', weak:'السرير بيناديك أقوى من المنبه', c:['#7f5cff','#2dd4bf'] },
+    drama: { e:'🎭', name:'ملك / ملكة الدراما',
+      desc:'أي موقف بسيط عندك بيتحول لفيلم سينما. بتحس بكل حاجة بزيادة، وده اللي بيخليك أصدق وأمتع واحد في الشلة.',
+      power:'تحوّل أي حكاية لمسلسل من 30 حلقة', weak:'بتفتكر مواقف من 2016 كأنها امبارح', c:['#ff5d8f','#ffb347'] },
+    procrast: { e:'⏳', name:'سلطان التأجيل',
+      desc:'بتشتغل أحسن ما يكون قبل الديدلاين بنص ساعة. بتقول "هبدأ حالًا" من أسبوع، وفي الآخر بتطلع بنتيجة محترمة.',
+      power:'الإنجاز تحت الضغط بسرعة البرق', weak:'كلمة "بكرة" هي أكتر كلمة بتقولها', c:['#ff8a3d','#ffd23f'] },
+    leader: { e:'👑', name:'قائد الشلة',
+      desc:'إنت اللي بتحجز وبتنظّم وبتقول "يلا بينا". الشلة من غيرك بتفضل واقفة تسأل "نعمل إيه؟" لمدة ساعتين.',
+      power:'بتاخد قرار في ثواني وتمشّي الكل وراك', weak:'بتحس إن كل حاجة لازم تعدي من عندك', c:['#ffd23f','#ff5d8f'] },
+    mystery: { e:'🕶️', name:'الغامض الهادي',
+      desc:'قليل الكلام لكن كلمتك بتبقى القاضية. الكل مش عارف إنت بتفكر في إيه، وده بالظبط سر جاذبيتك.',
+      power:'تعليق واحد منك بيقفل النقاش', weak:'"مقروءة" هي ردك المفضل', c:['#3b82f6','#111827'] },
+    chaos: { e:'🤪', name:'عبقري الفوضى',
+      desc:'مفيش حد يعرف إنت هتعمل إيه بعد دقيقة، حتى إنت. أفكارك غريبة بس غالبًا بتطلع أحلى خروجة.',
+      power:'تضحّك أي مكان وتكسر أي ملل', weak:'ممكن تفتح 40 تاب وتنسى كنت بتدوّر على إيه', c:['#22d3ee','#a3e635'] }
+  };
+
+  // ===== بنك الأسئلة: 25 موقف × 40 ظرف = 1000 سؤال مختلف =====
+// L كسلان | D دراما | P تأجيل | C قائد | M غامض | X فوضى
+const KEY = { L:'lazy', D:'drama', P:'procrast', C:'leader', M:'mystery', X:'chaos' };
+
+const SITS = [
+  ['صاحبك طلب منك خدمة كبيرة، بتعمل إيه؟','أنفذها فورًا وأنظم كل حاجة|C','أقول هعملها وأتأخر|P','أحكي للكل قد إيه أنا مضغوط|D','أعمل كأني ماشفتش الرسالة|M'],
+  ['حد سألك "عامل إيه؟"، ردك:','"مش هتصدق اللي حصلي النهاردة!"|D','"لو كنت حيوان هتبقى إيه؟"|X','🗿|M','الحمد لله تمام وخلاص|L'],
+  ['جهزت خطة للخروجة والشلة غيّرتها، رد فعلك:','أمسك الدفة وأعيد الترتيب|C','ماشي أنا معاكم في أي حاجة|L','أعمل دراما وأقول مفيش احترام|D','أقترح خطة مجنونة بديلة|X'],
+  ['لقيت 100 جنيه في الشارع، هتعمل بيهم إيه؟','أشتري أكل وأنام|L','أصرفهم في أول فكرة مجنونة|X','أقرر أصرفهم بعدين وأنساهم|P','أحتفظ بالسر وأكمل ببساطة|M'],
+  ['وصلت ميعادك بدري جدًا، بتعمل إيه؟','أخطط للمرحلة الجاية|C','أنام شوية|L','أراقب الناس وأحلل مواقفهم|M','أبعت رسايل لأي حد من الملل|X'],
+  ['صاحبك عمل فيك مقلب:','أرد عليه بمقلب أكبر|X','أخبّي ضحكتي وأكمل كأن مفيش حاجة|M','أزعل وأقول مش هسامح|D','أضحك وأقول هرد بعدين|P'],
+  ['موبايلك رن برقم غريب:','أرد وأعرف مين|C','أسيبه يرن|M','أقول يمكن مهم وأرد بعد ساعة|P','أحكي للكل إن في حد بيطاردني|D'],
+  ['صاحبك عايز رأيك في قرار مهم:','أقوله اعمل كذا وخلاص|C','أقوله اللي يريحك|L','أحكي له قصة مشابهة طويلة|D','أنصحه بحاجة خارج الصندوق|X'],
+  ['خلصت حلقة مسلسل وفي حلقة بعدها:','حلقة كمان وأنام|P','أنام فورًا|L','أكمل للصبح|X','أقيّم المسلسل وأقفل|M'],
+  ['فتحت التلاجة ملقتش حاجة:','أطلب أكل|L','أعمل تركيبة غريبة من اللي موجود|X','هروح أشتري... بعدين|P','أعمل مشكلة وأحس إني مظلوم|D'],
+  ['حد اتأخر عليك في ميعاد:','أبعتله "فين؟" كل دقيقة|C','أستنى وأعمل حاجة تانية|L','أتأخر أنا كمان|P','أمشي بدون كلمة|M'],
+  ['بتختار هدية لصاحبك:','أجهزها قبلها بأسبوع|C','أقول الهدية معنوية|L','أشتريها في آخر لحظة|P','أختار هدية غريبة ومضحكة|X'],
+  ['اتعرضت لموقف محرج قدام ناس:','أضحك وأكمل|X','أتجمد وأفتكره لسنين|D','أتصرف كأن مفيش حاجة|M','أقول أي حاجة تنقذ الموقف|C'],
+  ['في مكالمة فيديو جماعية:','أقود الكلام|C','أقفل الكاميرا وأسمع|M','أنام بنص عين|L','أعمل مواقف غريبة|X'],
+  ['الشلة بتتخانق على حاجة تافهة:','أتدخل وأحلها|C','أتفرج بصمت|M','أعلّق تعليق يشعلها أكتر|X','أقول مش مهم وأنسحب|L'],
+  ['فاتك ميعاد مهم:','أعتذر وأعوض بسرعة|C','أقول كانت في ظروف|P','أعمل مشهد درامي من الندم|D','أقول المهم نكمل|L'],
+  ['صاحبك نزل ستوري جديد:','أعلّق تعليق ذكي|M','أعمل لايك وأكمل|L','أرد بـ 12 ستيكر|X','أحلل الستوري وأحكي عنه|D'],
+  ['ظهرت قدامك فرصة جديدة:','أدرسها وأقرر بسرعة|C','أقول هفكر وأنسى|P','أجربها فورًا بدون تفكير|X','أشوف هتتعبني ولا لأ|L'],
+  ['صحيت متأخر عن ميعادك:','أجهز بسرعة وأمشي|C','أكمل نوم|L','ألوم الدنيا كلها|D','أروح متأخر بس بشياكة|P'],
+  ['حد قالك "عندي سر":','أسمعه وأحفظه|M','أقول احكي بسرعة|C','أفضل أتخيل هو إيه|D','أقول أنا كمان عندي أغرب منه|X'],
+  ['موبايلك وقع واتكسر:','أتصرف وأشتري تاني|C','أعيش بدونه وأرتاح|L','أعمل حداد|D','أسيبه لحد ما أتعود|P'],
+  ['عايز تغير روتينك:','أحط جدول جديد|C','أبدأ من الأسبوع الجاي|P','أعمل حاجة مجنونة النهاردة|X','أفضل زي ما أنا|L'],
+  ['قابلت شخص بتحبه:','أتكلم بثقة|C','أتصنّع الهدوء|M','أتلخبط وأقول كلام غريب|X','أحكي لأصحابي بعدها بالتفصيل|D'],
+  ['وقعت في مشكلة بسيطة:','أحلها فورًا|C','أستنى تتحل لوحدها|L','أضخّمها وأحكي للكل|D','أحلها قبل الديدلاين بدقيقة|P'],
+  ['صاحبك عايزك تيجي معاه مكان غريب:','أروح فورًا|X','أسأل الأول وأنظم|C','أقول لأ أنا مرتاح|L','أروح وأقعد أراقب|M']
+];
+
+const CTX = [
+  'لو النهاردة أجازة','لو مزاجك مش تمام','لو آخر الشهر والجيب فاضي','لو لسه صاحي من النوم','لو الساعة نص الليل',
+  'لو قبل الامتحانات بيوم','لو إنت مع شلة جديدة','لو الدنيا زحمة جدًا','لو إنت جعان جدًا','لو إنت في سفرية',
+  'لو النت فاصل','لو إنت في عزومة','لو إنت مرهق جدًا','لو مزاجك في السما','لو إنت في أول يوم بمكان جديد',
+  'لو الشحن على 5%','لو إنت مستعجل','لو إنت لوحدك في البيت','لو الدنيا بتمطر','لو إنت سهران',
+  'لو مش عايز تتكلم مع حد','لو راجع متأخر','لو الجو حر قوي','لو إنت في المواصلات','لو قبل سفرية بيوم',
+  'لو بتستنى حد من بدري','لو إنت في حفلة','لو لسه قابل ناس جدد','لو بتذاكر أو بتشتغل','لو إنت في عز الصيف',
+  'لو النهاردة يوم الخميس','لو لسه راجع من أجازة','لو إنت فاضي تمامًا','لو عندك ضغط كبير','لو إنت في عيد ميلاد',
+  'لو إنت مبسوط جدًا','لو الصبح بدري','لو بقالك أسبوع مش بتنام كويس','لو إنت في مطعم','لو اليوم كله بيمشي غلط'
+];
+
+let QS = [];
+
+// بنختار 5 مواقف مختلفة + 5 ظروف مختلفة عشوائيًا في كل زيارة
+function buildQuiz() {
+  const shuffle = (a) => a.map((v) => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map((x) => x[1]);
+  const sits = shuffle(SITS).slice(0, 5);
+  const ctxs = shuffle(CTX).slice(0, 5);
+  QS = sits.map((s, i) => ({
+    q: `${ctxs[i]}، ${s[0]}`,
+    o: s.slice(1).map((x) => { const [t, k] = x.split('|'); return [t, KEY[k]]; })
+  }));
+}
+
+const $ = (id) => document.getElementById(id);
+  let idx = 0, tally = {};
+
+  function start() {
+    idx = 0; tally = {}; buildQuiz();
+    $('intro').hidden = true; $('result').hidden = true; $('quiz').hidden = false;
+    $('dots').innerHTML = QS.map(() => '<i></i>').join('');
+    showQ();
+  }
+
+  function showQ() {
+    const item = QS[idx];
+    [...$('dots').children].forEach((d, i) => d.classList.toggle('on', i <= idx));
+    $('q').textContent = item.q;
+    const box = $('opts');
+    box.innerHTML = '';
+    // ترتيب الخيارات عشوائي كل مرة
+    [...item.o].sort(() => Math.random() - 0.5).forEach(([text, key]) => {
+      const b = document.createElement('button');
+      b.className = 'opt'; b.type = 'button'; b.textContent = text;
+      b.onclick = () => answer(key);
+      box.appendChild(b);
+    });
+  }
+
+  function answer(key) {
+    tally[key] = (tally[key] || 0) + 1;
+    if (++idx < QS.length) return showQ();
+    finish();
+  }
+
+  async function finish() {
+    const max = Math.max(...Object.values(tally));
+    const top = Object.keys(tally).filter((k) => tally[k] === max);
+    const key = top[Math.floor(Math.random() * top.length)]; // لو في تعادل نختار عشوائي
+    $('quiz').hidden = true; $('result').hidden = false;
+    try { await document.fonts.load('800 60px Cairo'); await document.fonts.load('600 40px Cairo'); } catch (e) {}
+    draw(TYPES[key], $('name').value.trim());
+  }
+
+  // ===== رسم الكارت على canvas =====
+  function wrap(ctx, text, maxW) {
+    const words = text.split(' '), lines = [];
+    let line = '';
+    for (const w of words) {
+      const t = line ? line + ' ' + w : w;
+      if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = w; }
+      else line = t;
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  function rr(ctx, x, y, w, h, r) {
+    ctx.beginPath(); ctx.roundRect(x, y, w, h, r);
+  }
+
+  function draw(t, user) {
+    const cv = $('cv'), ctx = cv.getContext('2d'), W = 1080, H = 1350;
+    const F = 'Cairo, system-ui, sans-serif';
+    ctx.direction = 'rtl'; ctx.textAlign = 'center';
+
+    const g = ctx.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, t.c[0]); g.addColorStop(1, t.c[1]);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+    // دوائر زخرفية
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    [[900,150,220],[120,1200,260],[980,1100,120]].forEach(([x,y,r]) => { ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill(); });
+
+    ctx.fillStyle = '#fff';
+    ctx.font = `600 44px ${F}`;
+    ctx.fillText(user ? `شخصية ${user} في الميمز هي` : 'شخصيتك في الميمز هي', W/2, 120);
+
+    ctx.font = '300px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+    ctx.fillText(t.e, W/2, 470);
+
+    ctx.font = `800 92px ${F}`;
+    ctx.shadowColor = 'rgba(0,0,0,.3)'; ctx.shadowBlur = 20;
+    ctx.fillText(t.name, W/2, 620);
+    ctx.shadowBlur = 0;
+
+    ctx.font = `600 42px ${F}`;
+    wrap(ctx, t.desc, 860).forEach((l, i) => ctx.fillText(l, W/2, 720 + i * 62));
+
+    // صندوقان: القوة والضعف
+    [['⚡ قوتك الخارقة', t.power, 930], ['💔 نقطة ضعفك', t.weak, 1100]].forEach(([title, text, y]) => {
+      ctx.fillStyle = 'rgba(0,0,0,0.28)';
+      rr(ctx, 90, y, 900, 140, 30); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = `800 34px ${F}`; ctx.fillText(title, W/2, y + 50);
+      ctx.font = `600 34px ${F}`;
+      const ls = wrap(ctx, text, 820);
+      ls.forEach((l, i) => ctx.fillText(l, W/2, y + 100 + i * 40));
+    });
+
+    ctx.fillStyle = 'rgba(255,255,255,.85)';
+    ctx.font = `600 34px ${F}`;
+    ctx.fillText('جرّب إنت كمان وشوف شخصيتك 👀', W/2, 1315);
+  }
+
+  // ===== المشاركة والحفظ =====
+  function blob() { return new Promise((r) => $('cv').toBlob(r, 'image/png')); }
+
+  $('save').onclick = async () => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(await blob());
+    a.download = 'my-meme-personality.png';
+    a.click();
+  };
+
+  $('share').onclick = async () => {
+    const file = new File([await blob()], 'my-meme-personality.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], text: 'دي شخصيتي في الميمز! جرّب إنت كمان' }); } catch (e) {}
+    } else {
+      $('save').click(); // المتصفح مش بيدعم المشاركة المباشرة
+    }
+  };
+
+  $('go').onclick = start;
+  $('again').onclick = () => { $('result').hidden = true; $('intro').hidden = false; };
+</script>
+</body>
+</html>
